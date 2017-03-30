@@ -18,13 +18,13 @@ SPARK_ARGS="
     --name ${SPARK_APP_NAME}
     --master ${SPARK_MASTER}
     --deploy-mode cluster
-    --supervise
     --driver-cores 1
     --driver-memory 512M
     --total-executor-cores 3
     --executor-memory 512M
 "
 
+#--supervise
 
 DEBUG_ARGS="--verbose"
 

@@ -2,6 +2,7 @@ package com.hcdlearning.buzz
 
 import java.text.{ParseException, SimpleDateFormat}
 import java.util.{Date, UUID}
+import java.sql.Timestamp
 
 object DateFormat {
 
@@ -26,6 +27,10 @@ object DateFormat {
   private def getTimeFromUUID(uuid: UUID): Long = {
     // https://support.datastax.com/hc/en-us/articles/204226019-Converting-TimeUUID-Strings-to-Dates
     (uuid.timestamp - NUM_100NS_INTERVALS_SINCE_UUID_EPOCH) / 10000
+  }
+
+  def getTimestampFromUUID(uuid: UUID): Timestamp = {
+    new Timestamp(getTimeFromUUID(uuid))
   }
 
   def getDateFromUUID(uuid: UUID): Date = {
