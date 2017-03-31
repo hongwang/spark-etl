@@ -1,4 +1,4 @@
-package com.hcdlearning.buzz
+package com.hcdlearning.buzz.entities
 
 case class QuizResultActivity(archive_date: String,
                               archive_time: String,

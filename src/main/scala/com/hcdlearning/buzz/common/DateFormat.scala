@@ -1,8 +1,8 @@
-package com.hcdlearning.buzz
+package com.hcdlearning.buzz.common
 
+import java.sql.Timestamp
 import java.text.{ParseException, SimpleDateFormat}
 import java.util.{Date, UUID}
-import java.sql.Timestamp
 
 object DateFormat {
 

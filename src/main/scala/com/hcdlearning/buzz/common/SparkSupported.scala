@@ -1,4 +1,4 @@
-package com.hcdlearning.buzz
+package com.hcdlearning.buzz.common
 
 import org.apache.spark.sql.SparkSession
 
@@ -12,5 +12,4 @@ trait SparkSupported {
     .config("hive.exec.dynamic.partition.mode", "nonstrict")
     .enableHiveSupport()
     .getOrCreate()
-
 }
