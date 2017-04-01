@@ -22,11 +22,8 @@ SPARK_ARGS="
     --driver-memory 512M
     --total-executor-cores 3
     --executor-memory 512M
+    --verbose
 "
-
-#--supervise
-
-DEBUG_ARGS="--verbose"
 
 sbt assembly
 [ $? != 0 ] && echo "compile failed" && exit 1
@@ -34,4 +31,4 @@ sbt assembly
 ${BASEDIR}/webhdfs/upload.sh ${NAMENODE} "/user/spark/app/spark-etl-assembly-1.0.jar" ${SPARK_APP_PATH}
 [ $? != 0 ] && echo "upload jar failed" && exit 1
 
-/opt/spark/bin/spark-submit ${SPARK_ARGS} ${DEBUG_ARGS} ${SPARK_APP_URL} ${WORKFLOW_ID} ${TARGET_DATE}
+/opt/spark/bin/spark-submit ${SPARK_ARGS} ${SPARK_APP_URL} ${WORKFLOW_ID} ${TARGET_DATE}

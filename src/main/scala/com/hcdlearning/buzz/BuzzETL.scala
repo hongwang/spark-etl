@@ -1,10 +1,10 @@
 package com.hcdlearning.buzz
 
 import com.hcdlearning.buzz.common.DateFormat._
-import com.hcdlearning.buzz.common.ETLContext
+import com.hcdlearning.buzz.common.{ETLContext, SparkSupported}
 import com.hcdlearning.buzz.tasks._
 
-object BuzzETL {
+object BuzzETL extends SparkSupported {
 
   def main(args: Array[String]): Unit = {
 
@@ -17,8 +17,10 @@ object BuzzETL {
 
     val ctx = new ETLContext(workflowId, targetDate)
 
-    //QuizResultTask.run(ctx)
-    QuizResultGroupTask.run(ctx)
+    //QuizResultTask.run(spark, ctx)
+    //QuizResultGroupTask.run(spark, ctx)
+
+    LessonTask.run(spark, ctx)
 
     // Build the theme table
   }
