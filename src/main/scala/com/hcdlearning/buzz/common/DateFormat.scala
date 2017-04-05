@@ -11,6 +11,7 @@ object DateFormat {
   val `yyyy-MM-dd` = new SimpleDateFormat("yyyy-MM-dd")
   val `yyyyMMdd` = new SimpleDateFormat("yyyyMMdd")
   val `yyyyMM` = new SimpleDateFormat("yyyyMM")
+  val `yyyy` =  new SimpleDateFormat("yyyy")
 
   def parse(value: String, format: SimpleDateFormat): Date = {
     try {

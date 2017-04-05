@@ -4,7 +4,6 @@ import org.apache.spark.sql.{SaveMode, SparkSession}
 import com.datastax.spark.connector._
 
 import com.hcdlearning.buzz.common.{ETLContext, UDF}
-import com.hcdlearning.buzz.common.DateFormat._
 import com.hcdlearning.buzz.entities.Lesson
 
 
@@ -29,9 +28,10 @@ object LessonTask {
       .mode(SaveMode.Overwrite)
       .parquet(s"hdfs://nameservice-01/user/datahub/staging/buzz/${ctx.workflowId}/${name}_raw_data")
 
-    // 3. Format delta data
+    // 3. Save to raw lesson table
     spark.sql(
       s"""
+         |INSERT overwrite TABLE buzz.raw_lesson
          |SELECT category,
          |  level,
          |  lesson_id,
@@ -42,6 +42,7 @@ object LessonTask {
          |  video_path,
          |  current_timestamp as __insert_time
          |FROM raw_lesson
-       """.stripMargin).show(999, false)
+       """.stripMargin)
+      //spark.sql("SELECT * FROM buzz.raw_lesson").show(999, false)
   }
 }

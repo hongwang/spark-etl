@@ -19,8 +19,9 @@ object BuzzETL extends SparkSupported {
 
     //QuizResultTask.run(spark, ctx)
     //QuizResultGroupTask.run(spark, ctx)
+    //LessonTask.run(spark, ctx)
 
-    LessonTask.run(spark, ctx)
+    QuizThemeBuildTask.run(spark, ctx)
 
     // Build the theme table
   }
