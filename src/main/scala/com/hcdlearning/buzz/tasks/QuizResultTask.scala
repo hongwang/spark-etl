@@ -95,7 +95,6 @@ object QuizResultTask {
     buildByWhole(spark)
     //buildByYear(spark, ctx)
     //spark.sql("SELECT * FROM buzz.raw_quiz_result").show(999, false)
-
   }
 
   def buildByWhole(spark: SparkSession) = {

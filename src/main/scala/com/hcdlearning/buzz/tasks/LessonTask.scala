@@ -43,6 +43,7 @@ object LessonTask {
          |  current_timestamp as __insert_time
          |FROM raw_lesson
        """.stripMargin)
-      //spark.sql("SELECT * FROM buzz.raw_lesson").show(999, false)
+
+    //spark.sql("SELECT * FROM buzz.raw_lesson").show(999, false)
   }
 }

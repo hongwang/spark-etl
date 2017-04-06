@@ -10,6 +10,7 @@ object QuizThemeBuildTask {
 
   def run(spark: SparkSession, ctx: ETLContext) {
 
+    // 1. flatted title, status and score
     spark.sql(
       s"""
          |SELECT quiz_result_group_id, result_id,
@@ -21,21 +22,16 @@ object QuizThemeBuildTask {
          |FROM (
          |  SELECT quiz_result_group_id, result_id, map(key, value) as group_map, insert_date, update_date
          |  FROM buzz.raw_quiz_result
-         |  WHERE update_date >= "${ctx.targetDateStr}"
          |)
          |GROUP BY quiz_result_group_id, result_id
        """.stripMargin)
-      .createOrReplaceTempView("daily_pivoted_quize_result")
+      .createOrReplaceTempView("pivoted_quize_result")
 
+    // 2. save it with relevant columns
     val month = format(ctx.targetDate, `yyyyMM`)
     spark.sql(
       s"""
          |INSERT overwrite TABLE buzz.theme_quiz_result
-         |SELECT *
-         |FROM buzz.theme_quiz_result
-         |WHERE month = '${month}'
-         |  AND update_date < "${ctx.targetDateStr}"
-         |UNION ALL
          |SELECT m.quiz_result_group_id,
          |  g.member_id,
          |  g.lesson_id,
@@ -50,17 +46,13 @@ object QuizThemeBuildTask {
          |  m.update_date,
          |  current_timestamp as __insert_time,
          |  ${month} as month
-         |FROM daily_pivoted_quize_result AS m
+         |FROM pivoted_quize_result AS m
          |INNER JOIN buzz.raw_quiz_result_group AS g
-         |  ON g.year = "${format(ctx.targetDate, `yyyy`)}"
-         |    AND m.quiz_result_group_id = g.quiz_result_group_id
+         |    ON m.quiz_result_group_id = g.quiz_result_group_id
          |INNER JOIN buzz.raw_lesson AS l
          |  ON g.lesson_id = l.lesson_id
        """.stripMargin)
 
-//    spark.sql(
-//      s"""
-//         |SELECT * FROM buzz.theme_quiz_result
-//       """.stripMargin).show(9999, false)
+    //spark.sql("SELECT * FROM buzz.theme_quiz_result").show(9999, false)
   }
 }

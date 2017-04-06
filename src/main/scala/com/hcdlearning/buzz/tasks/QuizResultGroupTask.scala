@@ -122,9 +122,6 @@ object QuizResultGroupTask {
          |DISTRIBUTE BY year(start_date), month(start_date), day(start_date)
       """.stripMargin)
 
-    spark.sql(
-      s"""
-         |SELECT * FROM buzz.raw_quiz_result_group
-       """.stripMargin).show(999, false)
+    //spark.sql("SELECT * FROM buzz.raw_quiz_result_group").show(999, false)
   }
 }

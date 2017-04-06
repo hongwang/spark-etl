@@ -17,12 +17,9 @@ object BuzzETL extends SparkSupported {
 
     val ctx = new ETLContext(workflowId, targetDate)
 
-    //QuizResultTask.run(spark, ctx)
-    //QuizResultGroupTask.run(spark, ctx)
-    //LessonTask.run(spark, ctx)
-
+    QuizResultTask.run(spark, ctx)
+    QuizResultGroupTask.run(spark, ctx)
+    LessonTask.run(spark, ctx)
     QuizThemeBuildTask.run(spark, ctx)
-
-    // Build the theme table
   }
 }
