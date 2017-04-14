@@ -28,7 +28,6 @@ object QuizThemeBuildTask {
       .createOrReplaceTempView("pivoted_quize_result")
 
     // 2. save it with relevant columns
-    val month = format(ctx.targetDate, `yyyyMM`)
     spark.sql(
       s"""
          |INSERT overwrite TABLE buzz.theme_quiz_result
@@ -45,7 +44,7 @@ object QuizThemeBuildTask {
          |  m.insert_date,
          |  m.update_date,
          |  current_timestamp as __insert_time,
-         |  ${month} as month
+         |  date_format(m.update_date, "yyyyMM") as month
          |FROM pivoted_quize_result AS m
          |INNER JOIN buzz.raw_quiz_result_group AS g
          |    ON m.quiz_result_group_id = g.quiz_result_group_id
