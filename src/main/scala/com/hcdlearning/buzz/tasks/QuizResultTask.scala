@@ -110,9 +110,9 @@ object QuizResultTask {
          |  current_timestamp as __insert_time,
          |  year(insert_date) as year
          |FROM (
-         |  SELECT * , rank() OVER (PARTITION BY quiz_result_group_id, result_id, key ORDER BY archive_time_t desc) as rank
+         |  SELECT * , ROW_NUMBER() OVER (PARTITION BY quiz_result_group_id, result_id, key ORDER BY archive_time_t desc) as row_no
          |  FROM buzz.raw_quiz_result_activity
-         |) t where t.rank = 1
+         |) t where t.row_no = 1
          |DISTRIBUTE BY year(insert_date), month(insert_date), day(insert_date)
       """.stripMargin)
   }
@@ -149,10 +149,10 @@ object QuizResultTask {
          |      __insert_time,
          |      year
          |    FROM (
-         |      SELECT * , rank() OVER (PARTITION BY quiz_result_group_id, result_id, key ORDER BY archive_time_t desc) as rank
+         |      SELECT * , ROW_NUMBER() OVER (PARTITION BY quiz_result_group_id, result_id, key ORDER BY archive_time_t desc) as row_no
          |      FROM formatted_delta_quiz_result_activity
          |      WHERE insert_date < "${ctx.targetDateStr}"
-         |    ) t WHERE t.rank = 1
+         |    ) t WHERE t.row_no = 1
          |  ) u ON m.quiz_result_group_id = u.quiz_result_group_id
          |      AND m.result_id = u.result_id
          |      AND m.key = u.key
@@ -172,10 +172,10 @@ object QuizResultTask {
          |    __insert_time,
          |    year
          |  FROM (
-         |    SELECT * , rank() OVER (PARTITION BY quiz_result_group_id, result_id, key ORDER BY archive_time_t desc) as rank
+         |    SELECT * , ROW_NUMBER() OVER (PARTITION BY quiz_result_group_id, result_id, key ORDER BY archive_time_t desc) as row_no
          |    FROM formatted_delta_quiz_result_activity
          |    WHERE insert_date >= "${ctx.targetDateStr}"
-         |  ) t where t.rank = 1
+         |  ) t where t.row_no = 1
          |)
        """.stripMargin)
   }

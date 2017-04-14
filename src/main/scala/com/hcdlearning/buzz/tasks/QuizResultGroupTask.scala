@@ -116,9 +116,9 @@ object QuizResultGroupTask {
          |  current_timestamp as __insert_time,
          |  year(start_date) as year
          |FROM (
-         |  SELECT * , rank() OVER (PARTITION BY member_id, lesson_id, type, quiz_result_group_id ORDER BY archive_time_t desc) as rank
+         |  SELECT * , ROW_NUMBER() OVER (PARTITION BY member_id, lesson_id, type, quiz_result_group_id ORDER BY archive_time_t desc) as row_no
          |  FROM buzz.raw_quiz_result_group_activity
-         |) t where t.rank = 1
+         |) t where t.row_no = 1
          |DISTRIBUTE BY year(start_date), month(start_date), day(start_date)
       """.stripMargin)
 
