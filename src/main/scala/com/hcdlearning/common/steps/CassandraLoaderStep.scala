@@ -1,13 +1,31 @@
+package com.hcdlearning.common.steps
+
+import org.apache.log4j.Logger
+import org.apache.spark.sql._
+import com.hcdlearning.common.{ ExecuteContext }
+
 class CassandraLoaderStep (
-  val keyspaceName: String,
-  val tableName: String,
-  val whereCql: String
+  ctx: ExecuteContext,
+  keyspaceName: String,
+  tableName: String,
+  whereCql: String
 ) extends BaseStep {
 
-  import spark.implicits._
+  def this(
+    ctx: ExecuteContext,
+    keyspaceName: String, 
+    tableName: String) = {
+    this(ctx, keyspaceName, tableName, "")
+  }
 
-  override def execute() {
-    println("Execute CassandraLoaderStep")
+  val spark = ctx.getSpark
+  val logger = Logger.getLogger(classOf[CassandraLoaderStep].getName)
+
+  override def execute(): DataFrame = {
+    println("Execute CassandraLoaderStep from println")
+    logger.info("Execute CassandraLoaderStep from logger")
+
+    import spark.implicits._
 
     var df = spark
       .read
@@ -15,20 +33,10 @@ class CassandraLoaderStep (
       .options(Map("keyspace" -> keyspaceName, "table" -> tableName, "pushdown" -> "true"))
       .load()
 
-      if (!whereCql.isEmpty) {
-        df = df.filter(whereCql)
-      }
+    if (!whereCql.isEmpty) {
+      df = df.filter(whereCql)
+    }
 
-  }
-
-}
-
-object CassandraLoaderStep {
-  def apply(keyspaceName: String, tableName: String) = {
-    new CassandraLoaderStep(
-      keyspaceName,
-      tableName,
-      ""
-    )
+    df
   }
 }
