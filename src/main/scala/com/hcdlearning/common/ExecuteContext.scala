@@ -1,7 +1,11 @@
 package com.hcdlearning.common
 
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
-class ExecuteContext(spark: SparkSession) {
-    def getSpark = spark
+private[hcdlearning] class ExecuteContext(
+  val spark: SparkSession
+) {
+
+  private[common] var df: DataFrame = _
+
 }

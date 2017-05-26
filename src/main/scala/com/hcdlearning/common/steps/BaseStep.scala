@@ -1,7 +1,17 @@
 package com.hcdlearning.common.steps
 
-import org.apache.spark.sql._
+import com.hcdlearning.common.{ Logging, ExecuteContext }
 
 abstract class BaseStep() {
-    def execute(): DataFrame
+  def execute(ctx: ExecuteContext): Unit
+
+//   final def run(ctx: ExecuteContext): Boolean = {
+//     try {
+//       execute(ctx)
+//       true
+//     } catch {
+//       case e: Exception => logger.Error(e)
+//       false
+//     }
+//   }
 }
