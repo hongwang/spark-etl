@@ -1,16 +1,16 @@
 package com.hcdlearning.common.steps
 
-import com.hcdlearning.common.{ Logging, ExecuteContext }
-import org.apache.spark.sql.{SaveMode, SparkSession}
+import com.hcdlearning.common.ExecuteContext
+import org.apache.spark.sql.SparkSession
 
 class ParquetOutputStep(
   mode: String,
   path: String
-) extends BaseStep with Logging {
+) extends BaseStep {
+
+  override def name = "ParquetOutputStep"
 
   override def execute(ctx: ExecuteContext) {
-    logger.info("Execute ParquetOutputStep")
-
     ctx.df.write.mode(mode).parquet(path)
   }
 

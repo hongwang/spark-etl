@@ -8,12 +8,10 @@ object ExecuteEngine extends Logging {
   def run(spark: SparkSession, steps: List[BaseStep]) = {
     logger.info(s"start to run ${steps.length} steps")
 
-    val ctx = new ExecuteContext(spark)
-    for(step <- steps) {
-      step.execute(ctx)
-    }
+    val ctx = new ExecuteContext(spark, debug=true)
+    steps.foreach(step => step.run(ctx))
 
-    logger.info("finished steps")
+    logger.info("finished run steps")
   }
 
 }

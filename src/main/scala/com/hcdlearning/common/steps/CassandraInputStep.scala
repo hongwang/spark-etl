@@ -1,25 +1,19 @@
 package com.hcdlearning.common.steps
 
-import com.hcdlearning.common.{ Logging, ExecuteContext }
+import com.hcdlearning.common.ExecuteContext
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class CassandraInputStep (
   keyspaceName: String,
   tableName: String,
-  whereCql: String,
-  cache: Boolean,
-  registerTo: String
-) extends BaseStep with Logging {
+  whereCql: String = "",
+  cache: Boolean = false,
+  registerTo: String = ""
+) extends BaseStep(cache, registerTo) {
 
-  def this(
-    keyspaceName: String, 
-    tableName: String) = {
-    this(keyspaceName, tableName, "", false, "")
-  }
+  override def name = "CassandraInputStep"
 
   override def execute(ctx: ExecuteContext) {
-    //println("Execute CassandraInputStep")
-    logger.info("Execute CassandraInputStep")
 
     val spark = ctx.spark
 
@@ -33,14 +27,6 @@ class CassandraInputStep (
 
     if (!whereCql.isEmpty) {
       df = df.filter(whereCql)
-    }
-
-    if (cache) {
-      df = df.cache()
-    }
-
-    if (!registerTo.isEmpty) {
-      df.createOrReplaceTempView(registerTo)
     }
 
     ctx.df = df
