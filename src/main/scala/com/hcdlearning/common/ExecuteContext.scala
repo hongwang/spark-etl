@@ -8,5 +8,4 @@ private[hcdlearning] class ExecuteContext(
 ) {
 
   private[common] var df: DataFrame = _
-
 }

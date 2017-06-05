@@ -4,14 +4,13 @@ import com.hcdlearning.common.ExecuteContext
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class CassandraInputStep (
+  name: String,
   keyspaceName: String,
   tableName: String,
   whereCql: String = "",
   cache: Boolean = false,
   registerTo: String = ""
-) extends BaseStep(cache, registerTo) {
-
-  override def name = "CassandraInputStep"
+) extends BaseStep(name, cache, registerTo) {
 
   override def execute(ctx: ExecuteContext) {
 

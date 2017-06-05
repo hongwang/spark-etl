@@ -3,11 +3,11 @@ package com.hcdlearning.common.steps
 import com.hcdlearning.common.{ Logging, ExecuteContext, ExecuteException }
 
 abstract class BaseStep(
+  name: String,
   cache: Boolean = false,
   registerTo: String = ""
 ) extends Logging {
 
-  def name: String
   protected def execute(ctx: ExecuteContext): Unit
 
   final def run(ctx: ExecuteContext) {
@@ -39,4 +39,7 @@ abstract class BaseStep(
     logger.info(s"end execute $name")
   }
 
+  def replaceTemplates(s: String, templates: Map[String, String]): String = {
+    ""
+  }
 }

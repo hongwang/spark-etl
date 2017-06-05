@@ -4,11 +4,12 @@ import com.hcdlearning.common.ExecuteContext
 import org.apache.spark.sql.SparkSession
 
 class ParquetOutputStep(
+  name: String,
   mode: String,
   path: String
-) extends BaseStep {
+) extends BaseStep(name) {
 
-  override def name = "ParquetOutputStep"
+  val template_fields = Seq("path")
 
   override def execute(ctx: ExecuteContext) {
     ctx.df.write.mode(mode).parquet(path)
