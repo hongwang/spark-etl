@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+WORKFLOW_ID="test_workflow"
+INSPECT="true"
+
 BASEDIR=$(dirname $0)/../..
 
 NAMENODES="uat-bigdata-01:50070,uat-bigdata-02:50070"
@@ -28,4 +31,4 @@ sbt assembly
 ${BASEDIR}/bin/webhdfs/upload.sh ${NAMENODE} "/user/spark/app/spark-etl-assembly-1.0.jar" ${SPARK_APP_PATH}
 [ $? != 0 ] && echo "upload jar failed" && exit 1
 
-/opt/spark/bin/spark-submit ${SPARK_ARGS} ${SPARK_APP_URL}
+/opt/spark/bin/spark-submit ${SPARK_ARGS} ${SPARK_APP_URL} ${WORKFLOW_ID} ${INSPECT}

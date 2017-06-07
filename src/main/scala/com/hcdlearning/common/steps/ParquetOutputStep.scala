@@ -9,10 +9,20 @@ class ParquetOutputStep(
   path: String
 ) extends BaseStep(name) {
 
-  val template_fields = Seq("path")
+  templateFields += ("path" -> path)
+  //val template_fields = Seq("path")
+
+  // override def renderTemplates(engine: BaseTemplateEngine ,templateContext: Map[String, String]) = {
+  //   templateContext + ("name" -> name)
+  //   _path = engine.render(_path, templateContext)
+  //   println(path)
+  // }
 
   override def execute(ctx: ExecuteContext) {
-    ctx.df.write.mode(mode).parquet(path)
+    val saveTo = templateFields.getOrElse("path", path)
+    logger.info(s"save parquet to $saveTo")
+
+    ctx.df.write.mode(mode).parquet(saveTo)
   }
 
 }

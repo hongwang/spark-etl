@@ -1,7 +1,7 @@
 package com.hcdlearning.sso
 
 import com.hcdlearning.buzz.common.{ SparkSupported }
-import com.hcdlearning.common.ExecuteEngine
+import com.hcdlearning.common.{ ExecuteContext, ExecuteEngine }
 import com.hcdlearning.common.steps._
 
 object SSOStaticETL extends SparkSupported {
@@ -12,7 +12,11 @@ object SSOStaticETL extends SparkSupported {
       throw new IllegalStateException("some argument must be specified.")
     }
 
-    val workflowId = args(0)
+    val (workflowId, inspect) = args match {
+      case Array(workflowId, inspect) => (workflowId, inspect.toBoolean)
+      case Array(workflowId) => (workflowId, false)
+    }
+
     val loading_sql = s"""
       |INSERT overwrite TABLE sso.raw_application
       |SELECT application_id,
@@ -32,6 +36,7 @@ object SSOStaticETL extends SparkSupported {
       new SQLOutputStep("write_to_dw", loading_sql) ::
       Nil
 
-    ExecuteEngine.run(spark, steps)
+    val ctx = new ExecuteContext(spark, workflowId, inspect=inspect)
+    ExecuteEngine.run(ctx, steps)
   }
 }

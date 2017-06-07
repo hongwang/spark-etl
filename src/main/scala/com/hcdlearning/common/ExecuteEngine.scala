@@ -5,10 +5,9 @@ import com.hcdlearning.common.steps.BaseStep
 
 object ExecuteEngine extends Logging {
 
-  def run(spark: SparkSession, steps: List[BaseStep]) = {
+  def run(ctx: ExecuteContext, steps: List[BaseStep]) = {
     logger.info(s"start to run ${steps.length} steps")
 
-    val ctx = new ExecuteContext(spark, debug=true)
     steps.foreach(step => step.run(ctx))
 
     logger.info("finished run steps")
