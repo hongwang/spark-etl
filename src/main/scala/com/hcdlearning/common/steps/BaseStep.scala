@@ -56,4 +56,6 @@ abstract class BaseStep(
 
     logger.info(s"end execute $name")
   }
+
+  def hold: Unit = ???
 }

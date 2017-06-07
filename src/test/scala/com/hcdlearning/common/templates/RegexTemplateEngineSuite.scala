@@ -1,8 +1,8 @@
 package com.hcdlearning.common.templates
 
-import org.scalatest.FunSuite
+import com.hcdlearning.SparkFunSuite
 
-class RegexTemplateEngineSuite extends FunSuite {
+class RegexTemplateEngineSuite extends SparkFunSuite {
 
   test("basic render") {
     val engine = new RegexTemplateEngine()
