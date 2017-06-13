@@ -8,6 +8,7 @@ class CassandraInputStep (
   keyspaceName: String,
   tableName: String,
   whereCql: String = "",
+  coalesce: Option[Int] = None,
   cache: Boolean = false,
   registerTo: String = ""
 ) extends BaseStep(name, cache, registerTo) {
@@ -26,6 +27,10 @@ class CassandraInputStep (
 
     if (!whereCql.isEmpty) {
       df = df.filter(whereCql)
+    }
+
+    if (coalesce.isDefined) {
+      df = df.coalesce(coalesce.get)
     }
 
     ctx.df = df

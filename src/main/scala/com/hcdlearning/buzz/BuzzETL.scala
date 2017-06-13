@@ -1,7 +1,8 @@
 package com.hcdlearning.buzz
 
+import com.hcdlearning.common.{SparkSupported}
 import com.hcdlearning.buzz.common.DateFormat._
-import com.hcdlearning.buzz.common.{ETLContext, SparkSupported}
+import com.hcdlearning.buzz.common.{ETLContext}
 import com.hcdlearning.buzz.tasks._
 
 object BuzzETL extends SparkSupported {

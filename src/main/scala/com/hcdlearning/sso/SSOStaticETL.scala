@@ -1,7 +1,6 @@
 package com.hcdlearning.sso
 
-import com.hcdlearning.buzz.common.{ SparkSupported }
-import com.hcdlearning.common.{ ExecuteContext, ExecuteEngine }
+import com.hcdlearning.common.{ SparkSupported, ExecuteContext, ExecuteEngine }
 import com.hcdlearning.common.steps._
 
 object SSOStaticETL extends SparkSupported {
@@ -31,7 +30,12 @@ object SSOStaticETL extends SparkSupported {
       |FROM reg_raw_application
     """.stripMargin
 
-    val steps: List[BaseStep] = new CassandraInputStep("read_from_source", "sso", "application", registerTo = "reg_raw_application") :: 
+    val steps: List[BaseStep] = new CassandraInputStep(
+        "read_from_source", 
+        "sso", 
+        "application", 
+        coalesce = Some(1), 
+        registerTo = "reg_raw_application") :: 
       new ParquetOutputStep("save_staging", "Overwrite", "hdfs://nameservice-01/user/datahub/staging/sso/{workflowId}/{name}_raw_data") ::
       new SQLOutputStep("write_to_dw", loading_sql) ::
       Nil
