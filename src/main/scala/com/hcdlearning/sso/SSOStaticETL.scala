@@ -1,7 +1,7 @@
 package com.hcdlearning.sso
 
 import com.hcdlearning.common.{ SparkSupported, ExecuteContext, ExecuteEngine }
-import com.hcdlearning.common.steps._
+import com.hcdlearning.common.definitions.steps._
 
 object SSOStaticETL extends SparkSupported {
 
@@ -40,7 +40,8 @@ object SSOStaticETL extends SparkSupported {
       new SQLOutputStep("write_to_dw", loading_sql) ::
       Nil
 
+    val recipe = Recipe("sso-static-loading", steps)
     val ctx = new ExecuteContext(spark, workflowId, inspect=inspect)
-    ExecuteEngine.run(ctx, steps)
+    ExecuteEngine.run(ctx, recipe)
   }
 }

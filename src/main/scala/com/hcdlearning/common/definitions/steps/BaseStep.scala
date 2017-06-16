@@ -1,4 +1,4 @@
-package com.hcdlearning.common.steps
+package com.hcdlearning.common.definitions.steps
 
 import scala.collection.mutable
 import com.hcdlearning.common.templates.{ renderEngine, BaseTemplateEngine }
