@@ -20,7 +20,7 @@ class ParquetOutputStep(
 
   override def execute(ctx: ExecuteContext) {
     val saveTo = templateFields.getOrElse("path", path)
-    logger.info(s"save parquet to $saveTo")
+    logInfo(s"save parquet to $saveTo")
 
     ctx.df.write.mode(mode).parquet(saveTo)
   }

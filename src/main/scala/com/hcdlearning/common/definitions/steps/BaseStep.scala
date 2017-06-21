@@ -1,16 +1,22 @@
 package com.hcdlearning.common.definitions.steps
 
-import scala.collection.mutable
+import scala.collection.mutable.{ ArrayBuffer, Map => MutableMap }
+
+import com.hcdlearning.common.Logging
+import com.hcdlearning.common.definitions.StepState
 import com.hcdlearning.common.templates.{ renderEngine, BaseTemplateEngine }
-import com.hcdlearning.common.{ Logging, ExecuteContext, ExecuteException }
+import com.hcdlearning.common.execution.{ ExecuteContext, ExecuteException }
 
 abstract class BaseStep(
-  name: String,
+  val name: String,
   cache: Boolean = false,
   registerTo: String = ""
 ) extends Logging {
 
-  protected val templateFields: mutable.Map[String, String] = mutable.Map()
+  private var state = StepState.NONE
+
+  protected val templateFields: MutableMap[String, String] = MutableMap()
+  protected val upstreamSteps: ArrayBuffer[BaseStep] = ArrayBuffer.empty[BaseStep]
 
   protected def execute(ctx: ExecuteContext): Unit
 
@@ -22,13 +28,18 @@ abstract class BaseStep(
     for ((k, v) <- templateFields) {
       val rendered = renderEngine.render(v, templateContext)
       templateFields(k) = rendered
-      logger.info(s"render $k: $v => $rendered")
+      logInfo(s"render $k: $v => $rendered")
     }
   }
 
-  final def run(ctx: ExecuteContext) {
-    logger.info(s"start execute $name")
+  final def runnable(): Boolean = {  
+    upstreamSteps.forall(step => step.state == StepState.SUCCESS)
+  }
 
+  final def run(ctx: ExecuteContext) {
+    logInfo(s"start execute $name")
+
+    state = StepState.RUNNING
     try {
       renderTemplates(ctx)
 
@@ -48,14 +59,20 @@ abstract class BaseStep(
       if (!registerTo.isEmpty) {
         ctx.df.createOrReplaceTempView(registerTo)
       }
+
+      state = StepState.SUCCESS
+
     } catch {
-      case e: Exception => 
-        logger.error(e)
+      case e: Throwable => 
+        logError("execute step failed", e)
+        state = StepState.FAILED
         throw new ExecuteException(s"Execute failed in $name", e)
     }
 
-    logger.info(s"end execute $name")
+    logInfo(s"end execute $name")
   }
 
-  def hold: Unit = ???
+  final def setUpstream(step: BaseStep) {
+    upstreamSteps += step
+  }
 }
