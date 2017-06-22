@@ -1,45 +1,24 @@
 package com.hcdlearning.common.definitions
 
-import com.hcdlearning.common.Logging
+import scala.collection.mutable.ArrayBuffer
+
+import com.hcdlearning.common.{ Logging, ETLException }
 import com.hcdlearning.common.definitions.steps.BaseStep
 
-private[common] case class Recipe(
+private[hcdlearning] case class Recipe(
   name: String,
   steps: Seq[BaseStep]
-) {
-  
-  def topologicalSteps(): Seq[BaseStep] = {
-    val sorted = ArrayBuffer.empty[BaseStep]
+)
 
-    if (steps.isEmpty) return sorted
+private[hcdlearning] object Recipe extends Logging {
 
-    val unsorted = ArrayBuffer(steps: _*)
-
-    while(unsorted.nonEmpty) {
-      acyclic = false
-
-      for(step <- unsorted) {
-        for( <- step.upstreamSteps) {
-
-        }
-      }
-
-      if(!acyclic) throw new ETLException(s"A cyclic dependency occurred in recipe: ${name}")
-    }
-
-    sorted
-  }
-}
-
-object Recipe extends Logging {
-
-  def apply(name: String, steps: Seq[BaseStep], topotaxy: Map[String, String]): Recipe = {
-
-    buildTopology(steps, topotaxy)
-    new Recipe(name, steps)
+  def apply(name: String, steps: Seq[BaseStep], topotaxy: Seq[(String, String)]): Recipe = {
+    setTopotaxy(steps, topotaxy)
+    val sortedSteps = topologicalSort(steps)
+    new Recipe(name, sortedSteps)
   }
 
-  private def buildTopology(steps: Seq[BaseStep], topotaxy: Map[String, String]) {
+  private def setTopotaxy(steps: Seq[BaseStep], topotaxy: Seq[(String, String)]) {
     val keyedSteps = Map(steps.map(step => step.name -> step): _*)
 
     try {
@@ -48,6 +27,39 @@ object Recipe extends Logging {
       case e: NoSuchElementException => 
         logError("cannot identify step", e)
         throw e
+      case e: Throwable =>
+        logError("something wrong", e)
+        throw e
     }
+  }
+
+  private def topologicalSort(steps: Seq[BaseStep]): Seq[BaseStep] = {
+    val sorted = ArrayBuffer.empty[BaseStep]
+
+    if (steps.isEmpty) return sorted
+
+    val unsorted = ArrayBuffer(steps: _*)
+    while(unsorted.nonEmpty) {
+      var acyclic = false
+
+      for(step <- unsorted.toArray) {
+        logDebug(s"enter step: ${step.name}, upstream count: ${step.upstreamSteps.length}")
+        val unsortedStep = step.upstreamSteps.find(s => unsorted.contains(s))
+        logDebug(s"unsortedStep: ${unsortedStep.isEmpty}")
+        if (unsortedStep.isEmpty) {
+          acyclic = true
+          unsorted -= step
+          sorted += step
+        }
+      }
+
+      if(!acyclic) {
+        val msg = "A cyclic dependency occurred in recipe"
+        logError(msg)
+        throw new ETLException(msg)
+      }
+    }
+
+    sorted
   }
 }

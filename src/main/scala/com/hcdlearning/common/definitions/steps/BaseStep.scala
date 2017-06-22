@@ -16,7 +16,7 @@ abstract class BaseStep(
   private var state = StepState.NONE
 
   protected val templateFields: MutableMap[String, String] = MutableMap()
-  protected val upstreamSteps: ArrayBuffer[BaseStep] = ArrayBuffer.empty[BaseStep]
+  val upstreamSteps: ArrayBuffer[BaseStep] = ArrayBuffer.empty[BaseStep]
 
   protected def execute(ctx: ExecuteContext): Unit
 
@@ -32,6 +32,7 @@ abstract class BaseStep(
     }
   }
 
+  // it should be used if we run steps in parallel
   final def runnable(): Boolean = {  
     upstreamSteps.forall(step => step.state == StepState.SUCCESS)
   }

@@ -1,6 +1,6 @@
 package com.hcdlearning.common.definitions.steps
 
-import com.hcdlearning.common.ExecuteContext
+import com.hcdlearning.common.execution.ExecuteContext
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class CassandraInputStep (

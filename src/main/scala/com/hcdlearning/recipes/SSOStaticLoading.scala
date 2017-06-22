@@ -1,11 +1,11 @@
-package com.hcdlearning.sso
+package com.hcdlearning.recipes
 
 import com.hcdlearning.common.SparkSupported
 import com.hcdlearning.common.execution.{ ExecuteContext, ExecuteEngine }
 import com.hcdlearning.common.definitions.Recipe
 import com.hcdlearning.common.definitions.steps._
 
-object SSOStaticETL extends SparkSupported {
+object SSOStaticLoading extends SparkSupported {
 
   def main(args: Array[String]): Unit = {
 
@@ -42,13 +42,13 @@ object SSOStaticETL extends SparkSupported {
       new SQLOutputStep("write_to_dw", loading_sql) ::
       Nil
 
-    val topotaxy = Map(
-      "read_from_source" -> "save_staging", 
+    val topotaxy = Seq(
+      "read_from_source" -> "save_staging",
       "save_staging" -> "write_to_dw"
     )
 
     val recipe = Recipe("sso-static-loading", steps, topotaxy)
-    val ctx = new ExecuteContext(spark, workflowId, inspect=inspect)
+    val ctx = new ExecuteContext(spark, workflowId, inspect)
     ExecuteEngine.run(ctx, recipe)
   }
 }

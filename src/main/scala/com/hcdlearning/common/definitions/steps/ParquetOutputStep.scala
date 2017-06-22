@@ -1,7 +1,8 @@
 package com.hcdlearning.common.definitions.steps
 
-import com.hcdlearning.common.ExecuteContext
 import org.apache.spark.sql.SparkSession
+
+import com.hcdlearning.common.execution.ExecuteContext
 
 class ParquetOutputStep(
   name: String,

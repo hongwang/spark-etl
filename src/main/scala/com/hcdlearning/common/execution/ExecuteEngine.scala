@@ -1,8 +1,7 @@
 package com.hcdlearning.common.execution
 
-import org.apache.spark.sql.SparkSession
+import com.hcdlearning.common.Logging
 import com.hcdlearning.common.definitions.Recipe
-import com.hcdlearning.common.definitions.steps.BaseStep
 
 object ExecuteEngine extends Logging {
 
@@ -10,12 +9,12 @@ object ExecuteEngine extends Logging {
     logInfo(s"Recipe ${recipe.name} start to run")
     val start = System.nanoTime
 
-    logInfo("Recipe ${recipe.name} has ${recipe.steps.length} steps")
-    val steps = recipe.topologicalSteps
+    logInfo(s"Recipe ${recipe.name} has ${recipe.steps.length} steps")
+    val steps = recipe.steps
 
     steps.foreach(step => step.run(ctx))
 
-    logInfo("Recipe %d finished, took %f s".format(recipe.name, (System.nanoTime - start) / 1e9))
+    logInfo("Recipe %s finished, took %f s".format(recipe.name, (System.nanoTime - start) / 1e9))
   }
 
 }
