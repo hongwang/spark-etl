@@ -1,22 +1,15 @@
-package com.hcdlearning.recipes
+package com.hcdlearning.apps
 
 import com.hcdlearning.common.SparkSupported
 import com.hcdlearning.common.execution.{ ExecuteContext, ExecuteEngine }
 import com.hcdlearning.common.definitions.Recipe
 import com.hcdlearning.common.definitions.steps._
 
-object SSOStaticLoading extends SparkSupported {
+object SSOStaticLoading extends App with SparkSupported {
 
   def main(args: Array[String]): Unit = {
 
-    if (args.length < 1) {
-      throw new IllegalStateException("some argument must be specified.")
-    }
-
-    val (workflowId, inspect) = args match {
-      case Array(workflowId, inspect) => (workflowId, inspect.toBoolean)
-      case Array(workflowId) => (workflowId, false)
-    }
+    val params = parseArgs(args)
 
     val loading_sql = s"""
       |INSERT overwrite TABLE sso.raw_application
@@ -38,7 +31,7 @@ object SSOStaticLoading extends SparkSupported {
         "application", 
         coalesce = Some(1), 
         registerTo = "reg_raw_application") :: 
-      new ParquetOutputStep("save_staging", "Overwrite", "hdfs://nameservice-01/user/datahub/staging/sso/{workflowId}/{name}_raw_data") ::
+      new ParquetOutputStep("save_staging", "Overwrite", "hdfs://nameservice-01/user/datahub/staging/sso/{workflow_id}/{name}_raw_data") ::
       new SQLOutputStep("write_to_dw", loading_sql) ::
       Nil
 
@@ -48,7 +41,7 @@ object SSOStaticLoading extends SparkSupported {
     )
 
     val recipe = Recipe("sso-static-loading", steps, topotaxy)
-    val ctx = new ExecuteContext(spark, workflowId, inspect)
+    val ctx = ExecuteContext(spark, params)
     ExecuteEngine.run(ctx, recipe)
   }
 }

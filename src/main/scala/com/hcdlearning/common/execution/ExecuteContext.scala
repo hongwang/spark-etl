@@ -2,18 +2,34 @@ package com.hcdlearning.common.execution
 
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-private[hcdlearning] class ExecuteContext(
+private[hcdlearning] class ExecuteContext private(
   val spark: SparkSession,
-  val workflowId: String,
-  val inspect: Boolean = false
+  val workflow_id: String,
+  val inspect: Boolean = false,
+  params: Map[String, String] = Map.empty[String, String]
 ) {
 
   private[common] var df: DataFrame = _
 
   def getProperties(): Map[String, String] = {
-    Map(
-      "inspect" -> inspect.toString,
-      "workflowId" -> workflowId
-    )
+    params
+  }
+}
+
+private[hcdlearning] object ExecuteContext {
+
+  val KEY_WORKFLOW_ID = "workflow_id"
+  val KEY_INSPECT = "inspect"
+
+  def apply(spark: SparkSession, params: Map[String, String]): ExecuteContext = {
+    val workflow_id = params.getOrElse(KEY_WORKFLOW_ID, throw new NoSuchElementException(KEY_WORKFLOW_ID))
+    val inspect = params.getOrElse(KEY_INSPECT, "false").toBoolean
+
+    if (inspect) {
+      println("show app arguments")
+      params.foreach(pair => println(s"${pair._1} -> ${pair._2}"))
+    }
+
+    new ExecuteContext(spark, workflow_id, inspect, params)
   }
 }
