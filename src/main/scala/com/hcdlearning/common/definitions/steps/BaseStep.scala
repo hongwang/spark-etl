@@ -49,7 +49,7 @@ abstract class BaseStep(
       require(ctx.df != null)
 
       if (ctx.inspect) {
-        println(s"show data in $name")
+        println(s"show data in $name, partitions: $ctx.df.rdd.getNumPartitions")
         ctx.df.show(999, false)
       }
 

@@ -23,7 +23,8 @@ class IndexOfTemplateEngine() extends BaseTemplateEngine {
     for ((begin, template, end) <- matchData(content, content.length, Nil)) {
       sb.append(content.substring(prev, begin))
       val identifier = template.substring(1, template.length-1)
-      sb.append(templateContext.getOrElse(identifier, template))
+      val value = eval(identifier, templateContext, template)
+      sb.append(value)
       prev = end
     }
 

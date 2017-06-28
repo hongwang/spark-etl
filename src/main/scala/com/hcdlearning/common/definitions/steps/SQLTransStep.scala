@@ -2,13 +2,15 @@ package com.hcdlearning.common.definitions.steps
 
 import com.hcdlearning.common.execution.ExecuteContext
 
-class SQLOutputStep(
+class SQLTransStep(
   name: String,
-  sql: String
-) extends BaseStep(name) {
+  sql: String,
+  cache: Boolean = false,
+  registerTo: String = ""
+) extends BaseStep(name, cache, registerTo) {
 
   override def execute(ctx: ExecuteContext) {
-    ctx.spark.sql(sql)
+    ctx.df = ctx.spark.sql(sql)
   }
 
 }

@@ -13,7 +13,8 @@ class RegexTemplateEngine() extends BaseTemplateEngine {
       sb.append(content.substring(prev, matchedData.start))
       val placeholder = matchedData.matched
       val identifier = placeholder.substring(1, placeholder.length-1)
-      sb.append(templateContext.getOrElse(identifier, placeholder))
+      val value = eval(identifier, templateContext, placeholder)
+      sb.append(value)
       prev = matchedData.end
     }
 
