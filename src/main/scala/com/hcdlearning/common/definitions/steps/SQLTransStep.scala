@@ -9,6 +9,8 @@ class SQLTransStep(
   registerTo: String = ""
 ) extends BaseStep(name, cache, registerTo) {
 
+  templateFields += ("sql" -> sql)
+
   override def execute(ctx: ExecuteContext) {
     ctx.df = ctx.spark.sql(sql)
   }

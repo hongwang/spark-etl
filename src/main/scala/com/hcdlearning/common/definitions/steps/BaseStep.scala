@@ -23,7 +23,7 @@ abstract class BaseStep(
   final def renderTemplates(ctx: ExecuteContext): Unit = {
     if (templateFields.isEmpty) return
 
-    val templateContext = ctx.getProperties + ("name" -> name)
+    val templateContext = ctx.getProperties + ("step_name" -> name)
 
     for ((k, v) <- templateFields) {
       val rendered = renderEngine.render(v, templateContext)
@@ -49,7 +49,7 @@ abstract class BaseStep(
       require(ctx.df != null)
 
       if (ctx.inspect) {
-        println(s"show data in $name, partitions: $ctx.df.rdd.getNumPartitions")
+        println(s"show data in $name, partitions: ${ctx.df.rdd.getNumPartitions}")
         ctx.df.show(999, false)
       }
 

@@ -15,4 +15,26 @@ class IndexOfTemplateEngineSuite extends SparkFunSuite {
     assert(actual == expected)
   }
 
+  test("missing render") {
+    val engine = new IndexOfTemplateEngine()
+    val content = "Hello {name}, you are {age} years old, you like {what}."
+    val values = Map("name" -> "Hong", "age" -> "18")
+    val expected = "Hello Hong, you are 18 years old, you like {what}."
+
+    val actual = engine.render(content, values)
+
+    assert(actual == expected)
+  }
+
+  test("yyyyMMdd filter") {
+    val engine = new IndexOfTemplateEngine()
+    val content = "Hello {name}, you were born on {birthday | yyyyMMdd}."
+    val values = Map("name" -> "Hong", "birthday" -> "2000-1-2")
+    val expected = "Hello Hong, you were born on 20000102."
+
+    val actual = engine.render(content, values)
+
+    assert(actual == expected)
+  }
+
 }

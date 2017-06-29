@@ -13,13 +13,12 @@ object SSODailyLoading extends App with SparkSupported {
     val params = parseArgs(args)
 
     import udfs.implicits._
-    spark.register("uuid_to_timestamp")
-    spark.register("fake")
+    spark.registerAll()
 
     val format_member_sql = s"""
       |SELECT archive_date,
       |  archive_time,
-      |  uuid_to_timestamp(archive_time) as archive_time_t,
+      |  timestamp_from_uuid(archive_time) as archive_time_t,
       |  member_id,
       |  application_id,
       |  application_set,
@@ -46,9 +45,9 @@ object SSODailyLoading extends App with SparkSupported {
       |  cast(to_unix_timestamp(insert_date) as timestamp) as insert_date,
       |  cast(to_unix_timestamp(update_date) as timestamp) as insert_date,
       |  {target_date | yyyyMM} as __update_month,
-      |  'hz' as __data_center,
+      |  '%s' as __data_center,
       |  current_timestamp as __insert_time
-      |FROM reg_raw_hz_member
+      |FROM %s
     """.stripMargin
 
     val format_sz_member_sql = s"""
@@ -66,7 +65,7 @@ object SSODailyLoading extends App with SparkSupported {
         "hdfs://nameservice-01/user/datahub/staging/sso/{workflow_id}/{step_name}_raw_data"
       ) :: new SQLTransStep(
         "format_hz_member",
-        format_member_sql,
+        format_member_sql.format("hz", "reg_raw_hz_member"),
         registerTo = "reg_formatted_hz_member"
       ) :: new CassandraInputStep(
         "read_sz_member", 
@@ -80,7 +79,7 @@ object SSODailyLoading extends App with SparkSupported {
         "hdfs://nameservice-01/user/datahub/staging/sso/{workflow_id}/{step_name}_raw_data"
       ) :: new SQLTransStep(
         "format_sz_member",
-        format_member_sql,
+        format_member_sql.format("sz", "reg_raw_sz_member"),
         registerTo = "reg_formatted_sz_member"
       )  :: Nil
 

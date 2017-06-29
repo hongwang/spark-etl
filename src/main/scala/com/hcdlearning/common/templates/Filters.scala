@@ -1,20 +1,12 @@
 package com.hcdlearning.common.templates
 
-import java.text.{ParseException, SimpleDateFormat}
 import com.hcdlearning.common.ETLException
+import com.hcdlearning.common.util.DateTimeUtils
 
 object Filters {
 
-  private lazy val `_yyyy-MM-dd` = new SimpleDateFormat("yyyy-MM-dd")
-  private lazy val `_yyyyMMdd` = new SimpleDateFormat("yyyyMMdd")
-
-  private val yyyyMMdd = (value: String) => {
-    try {
-      `_yyyyMMdd`.format(`_yyyy-MM-dd`.parse(value))
-    } catch {
-      case _: ParseException => throw new IllegalArgumentException(s"Invalid value $value")
-    }
-  }
+  private val yyyyMMdd = (value: String) => DateTimeUtils.format(
+    DateTimeUtils.parseDate(value), DateTimeUtils.`yyyyMMdd`)
 
   private val _filters = Map(
     "yyyyMMdd" -> yyyyMMdd

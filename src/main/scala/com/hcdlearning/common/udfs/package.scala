@@ -1,21 +1,29 @@
 package com.hcdlearning.common
 
 import org.apache.spark.sql.SparkSession
-import com.hcdlearning.common.udfs.DateUDFs
+//import org.apache.spark.sql.functions.udf
 
 package object udfs {
 
-  private val UDFs = Map(
-    "uuid_to_timestamp" -> DateUDFs.to_timestamp_from_uuid,
-    "fake" -> DateUDFs.fake
-  )
+  // private val _UDFs = Map(
+  //   "timestamp_from_uuid" -> udf(DateTimeUDFs.timestamp_from_uuid),
+  //   "fake" -> udf(DateTimeUDFs.fake)
+  // )
 
   object implicits {
-    implicit class SparkWithUDFsRegistor(val spark: SparkSession) {
-      def register(name: String) {
-        if (!UDFs.contains(name)) throw new ETLException(s"cannot find udf: $name")
+    implicit class SparkWithUDFRegistor(val spark: SparkSession) {
 
-        spark.udf.register(name, UDFs(name))
+      // cannot use this way before Spark 2.2.0, udf can be register directly in Spark 2.2.0
+      // we will enable this after Spark 2.2.0 released
+      // def register(name: String) {
+      //   if (!_UDFs.contains(name)) throw new ETLException(s"cannot find udf: $name")
+
+      //   spark.udf.register(name, _UDFs(name))
+      // }
+
+      def registerAll() {
+        spark.udf.register("timestamp_from_uuid", DateTimeUDFs.timestamp_from_uuid)
+        spark.udf.register("fake", DateTimeUDFs.fake)
       }
     }
   }
