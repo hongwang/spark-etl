@@ -10,8 +10,11 @@ class CassandraInputStep (
   whereCql: String = "",
   coalesce: Option[Int] = None,
   cache: Boolean = false,
+  stage: Boolean = false,
   registerTo: String = ""
-) extends BaseStep(name, cache, registerTo) {
+) extends BaseStep(name, cache, stage, registerTo) {
+
+  templateFields += ("whereCql" -> whereCql)
 
   override def execute(ctx: ExecuteContext) {
 
@@ -26,7 +29,7 @@ class CassandraInputStep (
       .load()
 
     if (!whereCql.isEmpty) {
-      df = df.filter(whereCql)
+      df = df.filter(getOrElse("whereCql", whereCql))
     }
 
     if (coalesce.isDefined) {

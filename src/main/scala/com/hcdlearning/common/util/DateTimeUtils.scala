@@ -9,14 +9,9 @@ import com.hcdlearning.common.ETLException
 object DateTimeUtils {
   final val NUM_100NS_INTERVALS_SINCE_UUID_EPOCH = 0x01b21dd213814000L
 
-  private lazy val `yyyy-MM-dd` = new SimpleDateFormat("yyyy-MM-dd")
-  private lazy val `yyyy/MM/dd` = new SimpleDateFormat("yyyy/MM/dd")
-  
-  lazy val `yyyyMMdd` = new SimpleDateFormat("yyyyMMdd")
-
   private lazy val _formats = Seq(
-    `yyyy-MM-dd`,
-    `yyyy/MM/dd`
+    Formats.`yyyy-MM-dd`,
+    Formats.`yyyy/MM/dd`
   )
 
   def timestampFromUUID(uuid: String): Timestamp = {
@@ -42,5 +37,13 @@ object DateTimeUtils {
 
   def format(value: Date, format: SimpleDateFormat): String = {
     format.format(value)
+  }
+
+
+  object Formats {
+    lazy val `yyyyMMdd` = new SimpleDateFormat("yyyyMMdd")
+    lazy val `yyyyMM` = new SimpleDateFormat("yyyyMM")
+    lazy val `yyyy-MM-dd` = new SimpleDateFormat("yyyy-MM-dd")
+    lazy val `yyyy/MM/dd` = new SimpleDateFormat("yyyy/MM/dd")
   }
 }

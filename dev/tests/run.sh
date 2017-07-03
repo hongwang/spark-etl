@@ -24,10 +24,9 @@ SPARK_ARGS="
     --driver-cores 1
     --driver-memory 512M
     --total-executor-cores 1
-    --executor-memory 512M
+    --executor-memory 1G
     --verbose
 "
-
 
 sbt assembly
 [ $? != 0 ] && echo "compile failed" && exit 1

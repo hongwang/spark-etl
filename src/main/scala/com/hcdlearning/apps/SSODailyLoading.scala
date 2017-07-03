@@ -41,16 +41,30 @@ object SSODailyLoading extends App with SparkSupported {
       |  city,
       |  channel,
       |  inner_tag,
-      |  cast(to_unix_timestamp(regist_date) as timestamp) as insert_date,
+      |  cast(to_unix_timestamp(regist_date) as timestamp) as regist_date,
       |  cast(to_unix_timestamp(insert_date) as timestamp) as insert_date,
-      |  cast(to_unix_timestamp(update_date) as timestamp) as insert_date,
+      |  cast(to_unix_timestamp(update_date) as timestamp) as update_date,
       |  {target_date | yyyyMM} as __update_month,
       |  '%s' as __data_center,
       |  current_timestamp as __insert_time
       |FROM %s
     """.stripMargin
 
-    val format_sz_member_sql = s"""
+    val combine_member_sql = s"""
+      |SELECT * 
+      |FROM reg_formatted_hz_member
+      |UNION
+      |SELECT * 
+      |FROM reg_formatted_sz_member
+    """.stripMargin
+
+    val save_member_sql = s"""
+      |SELECT * 
+      |FROM sso.raw_member_activity
+      |WHERE __update_month = {target_date | yyyyMM}
+      |  AND archive_date != '{target_date | yyyyMMdd}'
+      |UNION ALL
+      |SELECT * FROM reg_formatted_member
     """.stripMargin
 
     val steps: List[BaseStep] = new CassandraInputStep(
@@ -58,11 +72,8 @@ object SSODailyLoading extends App with SparkSupported {
         "sso_archive_hz", 
         "member", 
         "archive_date = '{target_date | yyyyMMdd}'",
-        registerTo = "reg_raw_hz_member"
-      ) :: new ParquetOutputStep(
-        "stage_hz_member", 
-        "Overwrite", 
-        "hdfs://nameservice-01/user/datahub/staging/sso/{workflow_id}/{step_name}_raw_data"
+        stage=true,
+        registerTo="reg_raw_hz_member"
       ) :: new SQLTransStep(
         "format_hz_member",
         format_member_sql.format("hz", "reg_raw_hz_member"),
@@ -72,22 +83,28 @@ object SSODailyLoading extends App with SparkSupported {
         "sso_archive_sz", 
         "member", 
         "archive_date = '{target_date | yyyyMMdd}'",
-        registerTo = "reg_raw_sz_member"
-      ) :: new ParquetOutputStep(
-        "stage_sz_member", 
-        "Overwrite", 
-        "hdfs://nameservice-01/user/datahub/staging/sso/{workflow_id}/{step_name}_raw_data"
+        stage=true,
+        registerTo="reg_raw_sz_member"
       ) :: new SQLTransStep(
         "format_sz_member",
         format_member_sql.format("sz", "reg_raw_sz_member"),
         registerTo = "reg_formatted_sz_member"
-      )  :: Nil
+      ) :: new SQLTransStep(
+        "combine_member",
+        combine_member_sql,
+        stage=true,
+        registerTo="reg_formatted_member"
+      ) :: new SQLTransStep(
+        "save_member_act",
+        save_member_sql
+      ) :: Nil
 
     val topotaxy = Seq(
-      "read_hz_member" -> "stage_hz_member",
-      "stage_hz_member" -> "format_hz_member",
-      "read_sz_member" -> "stage_sz_member",
-      "stage_sz_member" -> "format_sz_member"
+      "read_hz_member" -> "format_hz_member",
+      "read_sz_member" -> "format_sz_member",
+      "format_hz_member" -> "combine_member",
+      "format_sz_member" -> "combine_member",
+      "combine_member" -> "save_member_act"
     )
 
     val recipe = Recipe("sso-daily-loading", steps, topotaxy)

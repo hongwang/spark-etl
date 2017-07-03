@@ -1,6 +1,8 @@
 package com.hcdlearning.common.definitions.steps
 
 import scala.collection.mutable.{ ArrayBuffer, Map => MutableMap }
+import java.nio.file.Paths
+import org.apache.spark.sql.SaveMode
 
 import com.hcdlearning.common.Logging
 import com.hcdlearning.common.definitions.StepState
@@ -10,6 +12,7 @@ import com.hcdlearning.common.execution.{ ExecuteContext, ExecuteException }
 abstract class BaseStep(
   val name: String,
   cache: Boolean = false,
+  stage: Boolean = false,
   registerTo: String = ""
 ) extends Logging {
 
@@ -23,13 +26,17 @@ abstract class BaseStep(
   final def renderTemplates(ctx: ExecuteContext): Unit = {
     if (templateFields.isEmpty) return
 
-    val templateContext = ctx.getProperties + ("step_name" -> name)
+    val templateContext = ctx.getParams + ("step_name" -> name)
 
     for ((k, v) <- templateFields) {
       val rendered = renderEngine.render(v, templateContext)
       templateFields(k) = rendered
       logInfo(s"render $k: $v => $rendered")
     }
+  }
+
+  final def getOrElse(fieldName: String, defaultVal: String): String = {
+    templateFields.getOrElse(fieldName, defaultVal)
   }
 
   // it should be used if we run steps in parallel
@@ -50,11 +57,18 @@ abstract class BaseStep(
 
       if (ctx.inspect) {
         println(s"show data in $name, partitions: ${ctx.df.rdd.getNumPartitions}")
-        ctx.df.show(999, false)
+        ctx.df.show(100, false)
       }
 
       if (cache) {
         ctx.df.cache()
+      }
+
+      if (stage) {
+        val path = Paths.get(ctx.staging_path, ctx.workflow_id, name).toString
+        logInfo(s"staging step to $path")
+
+        ctx.df.write.mode(SaveMode.Overwrite).parquet(path)
       }
 
       if (!registerTo.isEmpty) {

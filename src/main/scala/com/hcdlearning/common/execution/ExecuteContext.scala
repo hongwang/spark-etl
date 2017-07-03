@@ -11,15 +11,23 @@ private[hcdlearning] class ExecuteContext private(
 
   private[common] var df: DataFrame = _
 
-  def getProperties(): Map[String, String] = {
+  def getParams(): Map[String, String] = {
     params
   }
+
+  def getParam(key: String, defaultVal: String): String = {
+    params.getOrElse(key, defaultVal)
+  }
+
+  def staging_path: String = params.getOrElse(ExecuteContext.KEY_STAGING_PATH, 
+    throw new NoSuchElementException(ExecuteContext.KEY_STAGING_PATH))
 }
 
 private[hcdlearning] object ExecuteContext {
 
-  val KEY_WORKFLOW_ID = "workflow_id"
-  val KEY_INSPECT = "inspect"
+  private val KEY_WORKFLOW_ID = "workflow_id"
+  private val KEY_STAGING_PATH = "staging_path"
+  private val KEY_INSPECT = "inspect"
 
   def apply(spark: SparkSession, params: Map[String, String]): ExecuteContext = {
     val workflow_id = params.getOrElse(KEY_WORKFLOW_ID, throw new NoSuchElementException(KEY_WORKFLOW_ID))

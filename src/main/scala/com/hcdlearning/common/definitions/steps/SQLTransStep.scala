@@ -6,13 +6,14 @@ class SQLTransStep(
   name: String,
   sql: String,
   cache: Boolean = false,
+  stage: Boolean = false,
   registerTo: String = ""
-) extends BaseStep(name, cache, registerTo) {
+) extends BaseStep(name, cache, stage, registerTo) {
 
   templateFields += ("sql" -> sql)
 
   override def execute(ctx: ExecuteContext) {
-    ctx.df = ctx.spark.sql(sql)
+    ctx.df = ctx.spark.sql(getOrElse("sql", sql))
   }
 
 }
