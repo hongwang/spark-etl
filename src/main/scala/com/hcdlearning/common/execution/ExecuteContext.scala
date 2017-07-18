@@ -34,6 +34,8 @@ private[hcdlearning] object ExecuteContext {
     val inspect = params.getOrElse(KEY_INSPECT, "false").toBoolean
 
     if (inspect) {
+      spark.sparkContext.setLogLevel("TRACE")
+
       println("show app arguments")
       params.foreach(pair => println(s"${pair._1} -> ${pair._2}"))
     }

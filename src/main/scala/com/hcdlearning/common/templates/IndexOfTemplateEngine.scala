@@ -1,19 +1,19 @@
 package com.hcdlearning.common.templates
 
 class IndexOfTemplateEngine() extends BaseTemplateEngine {
-  type DataList = List[(Int, String, Int)]
+  type SegmentList = List[(Int, String, Int)]
 
-  private def matchData(content: String, from: Int, l: DataList): DataList = {
+  private def matchData(content: String, from: Int, list: SegmentList): SegmentList = {
     val end = content.lastIndexOf("}", from)
     if (end == -1) 
-      return l
+      return list
 
     val begin = content.lastIndexOf("{", end)
     if (begin == -1)
-      return l
+      return list
 
     val template = content.substring(begin, end + 1)
-    matchData(content, begin - 1, (begin, template, end + 1) :: l)
+    matchData(content, begin - 1, (begin, template, end + 1) :: list)
   }
 
   def render(content: String, templateContext: Map[String, String]): String = {
