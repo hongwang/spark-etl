@@ -5,8 +5,7 @@ import com.hcdlearning.common.execution.ExecuteContext
 class CSVInputStep (
   name: String,
   path: String,
-  header: Boolean = false,
-  compression: String = "none",
+  options: Map[String, String] = Map.empty,
   cache: Boolean = false,
   stage: Boolean = false,
   registerTo: String = ""
@@ -20,7 +19,7 @@ class CSVInputStep (
 
     import spark.implicits._
 
-    var df = spark.read.option("header", header).csv(getOrElse("path", path))
+    var df = spark.read.options(options).csv(getOrElse("path", path))
 
     ctx.df = df
   }

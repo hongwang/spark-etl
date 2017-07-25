@@ -22,8 +22,8 @@ SPARK_ARGS="
     --master ${SPARK_MASTER}
     --deploy-mode cluster
     --driver-cores 1
-    --driver-memory 512M
-    --total-executor-cores 1
+    --driver-memory 1G
+    --total-executor-cores 3
     --executor-memory 1G
     --verbose
 "
