@@ -53,8 +53,7 @@ object BPMSMemberFinalScoreThemeBuilding extends App with SparkSupported {
       |FROM raw_daily_member_final_score
     """.stripMargin
 
-    val save_sql = s"""
-      |INSERT overwrite TABLE bp_marksimos.theme_member_final_score
+    val data_sql = s"""
       |SELECT
       |  seminar_id,
       |  member_id,
@@ -64,7 +63,6 @@ object BPMSMemberFinalScoreThemeBuilding extends App with SparkSupported {
       |  semianr_round_count,
       |  seminar_company_count,
       |  seminar_created_time,
-      |  seminar_finished_month,
       |  seminar_finished_time,
       |  epic_id,
       |  series_id,
@@ -92,15 +90,13 @@ object BPMSMemberFinalScoreThemeBuilding extends App with SparkSupported {
       |  last_period_scaled_budget,
       |  last_period_scaled_profit,
       |  last_period_scaled_som,
-      |  __insert_time
+      |  __insert_time,
+      |  seminar_finished_month
       |FROM bp_marksimos.theme_member_final_score
       |WHERE seminar_finished_month IN (
       |    SELECT DISTINCT seminar_finished_month
       |    FROM formatted_daily_member_final_score
-      |  ) AND seminar_id NOT IN (
-      |    SELECT DISTINCT seminar_id
-      |    FROM formatted_daily_member_final_score
-      |  )
+      |  ) AND seminar_id NOT IN ({seminar_ids})
       |UNION ALL
       |SELECT
       |  seminar_id,
@@ -111,7 +107,6 @@ object BPMSMemberFinalScoreThemeBuilding extends App with SparkSupported {
       |  semianr_round_count,
       |  seminar_company_count,
       |  seminar_created_time,
-      |  seminar_finished_month,
       |  seminar_finished_time,
       |  epic_id,
       |  series_id,
@@ -139,13 +134,14 @@ object BPMSMemberFinalScoreThemeBuilding extends App with SparkSupported {
       |  last_period_scaled_budget,
       |  last_period_scaled_profit,
       |  last_period_scaled_som,
-      |  __insert_time
+      |  __insert_time,
+      |  seminar_finished_month
       |FROM formatted_daily_member_final_score
     """.stripMargin
 
     val steps: List[BaseStep] = new CSVInputStep(
         "load_csv",
-        "hdfs://nameservice-01/user/datahub/staging/marksimos/{workflow_id}/theme_member_final_score.csv.gz",
+        "{staging_path}{workflow_id}/theme_member_final_score.csv.gz",
         options=Map(
           "header" -> "true",
           "compression" -> "gzip",
@@ -157,12 +153,16 @@ object BPMSMemberFinalScoreThemeBuilding extends App with SparkSupported {
         "format_data",
         format_sql,
         registerTo = "formatted_daily_member_final_score"
-      ) :: new SQLTransStep(
+      ) :: new SQLOutputInPlaceStep(
         "save",
-        save_sql
+        data_sql,
+        "bp_marksimos.theme_member_final_score"
       ) :: Nil
 
-    val topotaxy = Seq()
+    val topotaxy = Seq(
+      "load_csv" -> "format_data",
+      "format_data" -> "save"
+    )
 
     val recipe = Recipe("bpms-member_final_score-theme-building", steps, topotaxy)
     val ctx = ExecuteContext(spark, params)
