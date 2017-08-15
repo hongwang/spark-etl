@@ -1,5 +1,6 @@
 package com.hcdlearning.common.execution
 
+import scala.collection.mutable
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 private[hcdlearning] class ExecuteContext private(
@@ -9,18 +10,20 @@ private[hcdlearning] class ExecuteContext private(
   params: Map[String, String] = Map.empty[String, String]
 ) {
 
+  private val localProperties = mutable.Map[String, String](params.toSeq: _*)
   private[common] var df: DataFrame = _
 
-  def getParams(): Map[String, String] = {
-    params
+  def getProps(): Map[String, String] = {
+    localProperties.toMap
   }
 
-  def getParam(key: String, defaultVal: String): String = {
-    params.getOrElse(key, defaultVal)
-  }
-
-  def staging_path: String = params.getOrElse(ExecuteContext.KEY_STAGING_PATH, 
+  def staging_path: String = localProperties.getOrElse(ExecuteContext.KEY_STAGING_PATH, 
     throw new NoSuchElementException(ExecuteContext.KEY_STAGING_PATH))
+  
+  def set(key: String, value: String) {
+    localProperties(key) = value
+  }
+
 }
 
 private[hcdlearning] object ExecuteContext {

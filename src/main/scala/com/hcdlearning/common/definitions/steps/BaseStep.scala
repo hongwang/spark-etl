@@ -26,7 +26,7 @@ abstract class BaseStep(
   final def renderTemplates(ctx: ExecuteContext): Unit = {
     if (templateFields.isEmpty) return
 
-    val templateContext = ctx.getParams + ("step_name" -> name)
+    val templateContext = ctx.getProps + ("step_name" -> name)
 
     for ((k, v) <- templateFields) {
       val rendered = renderEngine.render(v, templateContext)
