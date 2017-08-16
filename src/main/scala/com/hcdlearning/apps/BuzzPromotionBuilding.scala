@@ -11,15 +11,6 @@ object BuzzPromotionBuilding extends App with SparkSupported {
 
     val params = parseArgs(args)
 
-    // Shirley	15601831863	bPHxXqi
-    // 王怡	18721364917	bi5RAir
-    // 小刘	15161163116	aYGSpAh
-    // 小钟	15962776461	cy8UNKA
-    // 小麦	15768029200	aKN8TKg
-    // 小缪	18362153673	bA6YX9h
-    // 小王	15216801867	dgLg8TK
-    // Ben	13524661245	bz4QMeH
-
     val format_sql = s"""
       |SELECT ite.member_id, 
       |  ite.application_id, 
@@ -29,16 +20,16 @@ object BuzzPromotionBuilding extends App with SparkSupported {
       |  ite.channel, 
       |  ite.regist_date,
       |  g.grade AS education_grade,
-      |  s.member_id AS inviter_member_id,
-      |  s.name AS inviter_name,
+      |  p.promoter_id AS inviter_member_id,
+      |  p.name AS inviter_name,
       |  itd.invite_code,
       |  itd.insert_date AS invite_date,
       |  current_timestamp AS __insert_time
       |FROM reg_invitee_member AS ite
       |  INNER JOIN reg_invited_member AS itd
       |    ON ite.member_id = itd.invitee_member_id
-      |  INNER JOIN reg_setting AS s
-      |    ON itd.invite_code = s.invite_code
+      |  INNER JOIN reg_promoter AS p
+      |    ON itd.invite_code = p.invite_code
       |  LEFT JOIN reg_grade AS g
       |    ON ite.member_id = g.member_id
     """.stripMargin
@@ -46,32 +37,78 @@ object BuzzPromotionBuilding extends App with SparkSupported {
     val grade_sql = s"""
       |SELECT member_id, grade 
       |FROM (
-      |  SELECT member_id, 
+      |  SELECT member_id, grade,
       |    ROW_NUMBER() OVER (PARTITION BY member_id ORDER BY update_date DESC) as row_no
       |  FROM reg_eductaion
       |) t WHERE t.row_no = 1
     """.stripMargin
 
-    val steps: List[BaseStep] = new CassandraInputStep(
+    val save_sql = s"""
+      |SELECT member_id,
+      |  application_id,
+      |  name, 
+      |  gender, 
+      |  mobile, 
+      |  channel, 
+      |  regist_date,
+      |  education_grade,
+      |  inviter_member_id,
+      |  inviter_name,
+      |  invite_code,
+      |  invite_date,
+      |  __insert_time
+      |FROM buzz.theme_promotion_201708
+      |WHERE invite_date NOT BETWEEN '{target_date}' and date_add('{target_date}', 1)
+      |UNION ALL
+      |SELECT member_id,
+      |  application_id,
+      |  name, 
+      |  gender, 
+      |  mobile, 
+      |  channel, 
+      |  regist_date,
+      |  education_grade,
+      |  inviter_member_id,
+      |  inviter_name,
+      |  invite_code,
+      |  invite_date,
+      |  __insert_time
+      |FROM reg_formatted_promotion
+    """.stripMargin
+
+    val steps: List[BaseStep] = new CSVInputStep(
+        "load_promoter_csv",
+        "hdfs://nameservice-01/user/datahub/files/buzz/promotion_201708.csv",
+        options=Map(
+          "header" -> "true",
+          "delimiter" -> ";"
+        ),
+        cache=true,
+        registerTo="reg_promoter"
+      ) :: new ScalarizationStep(
+        "extract_invite_codes",
+        "invite_code",
+        "invite_codes",
+        ScalarizationMode.MKSTRING_WITH_QUOTES
+      ) :: new CassandraInputStep(
         "load_invited_member", 
         "sso", 
         "invited_member", 
         s"""
-          |invite_code in ('bPHxXqi', 'bi5RAir', 'aYGSpAh', 'cy8UNKA', 'aKN8TKg', 'bA6YX9h', 'dgLg8TK', 'bz4QMeH') 
-          |and insert_date between '{target_date}' and date_add('{target_date}', 1)""".stripMargin,
+          |invite_code in ({invite_codes}) and 
+          |insert_date between '{target_date}' and date_add('{target_date}', 1)""".stripMargin,
         cache=true,
         registerTo="reg_invited_member"
-      ) :: new VectorizeStep(
+      ) :: new ScalarizationStep(
         "extract_member_ids",
         "invitee_member_id",
         "invitee_member_ids",
-        VectorizeMode.MKSTRING_WITH_QUOTES
+        ScalarizationMode.MKSTRING_WITH_QUOTES
       ) :: new CassandraInputStep(
         "load_invitee_member", 
         "sso", 
         "member", 
         "member_id in ({invitee_member_ids})",
-        cache=true,
         registerTo="reg_invitee_member"
       ) :: new CassandraInputStep(
         "load_education", 
@@ -82,20 +119,26 @@ object BuzzPromotionBuilding extends App with SparkSupported {
       ) ::new SQLTransStep(
         "get_lastest_grade",
         grade_sql,
-        cache=true,
         registerTo = "reg_grade"
       ):: new SQLTransStep(
         "format_promotion",
         format_sql,
         registerTo = "reg_formatted_promotion"
-      ):: Nil
+      ) :: new SQLOutputInPlaceStep(
+        "save",
+        save_sql,
+        "buzz.theme_promotion_201708"
+      ) :: Nil
 
     val topotaxy = Seq(
-      "load_invited_member" -> "extract_member_ids",
-      "extract_member_ids" -> "load_invitee_member",
-      "load_invitee_member" -> "load_education",
-      "load_education" -> "get_lastest_grade",
-      "get_lastest_grade" -> "format_promotion"
+      "load_promoter_csv"    -> "extract_invite_codes",
+      "extract_invite_codes" -> "load_invited_member",
+      "load_invited_member"  -> "extract_member_ids",
+      "extract_member_ids"   -> "load_invitee_member",
+      "load_invitee_member"  -> "load_education",
+      "load_education"       -> "get_lastest_grade",
+      "get_lastest_grade"    -> "format_promotion",
+      "format_promotion"     -> "save"
     )
 
     val recipe = Recipe("buzz-promotion-building", steps, topotaxy)
