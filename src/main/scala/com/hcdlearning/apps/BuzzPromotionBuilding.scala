@@ -44,35 +44,11 @@ object BuzzPromotionBuilding extends App with SparkSupported {
     """.stripMargin
 
     val save_sql = s"""
-      |SELECT member_id,
-      |  application_id,
-      |  name, 
-      |  gender, 
-      |  mobile, 
-      |  channel, 
-      |  regist_date,
-      |  education_grade,
-      |  inviter_member_id,
-      |  inviter_name,
-      |  invite_code,
-      |  invite_date,
-      |  __insert_time
+      |SELECT *
       |FROM buzz.theme_promotion_201708
       |WHERE invite_date NOT BETWEEN '{target_date}' and date_add('{target_date}', 1)
       |UNION ALL
-      |SELECT member_id,
-      |  application_id,
-      |  name, 
-      |  gender, 
-      |  mobile, 
-      |  channel, 
-      |  regist_date,
-      |  education_grade,
-      |  inviter_member_id,
-      |  inviter_name,
-      |  invite_code,
-      |  invite_date,
-      |  __insert_time
+      |SELECT *
       |FROM reg_formatted_promotion
     """.stripMargin
 
@@ -116,7 +92,7 @@ object BuzzPromotionBuilding extends App with SparkSupported {
         "education", 
         "member_id in ({invitee_member_ids})",
         registerTo="reg_eductaion"
-      ) ::new SQLTransStep(
+      ) :: new SQLTransStep(
         "get_lastest_grade",
         grade_sql,
         registerTo = "reg_grade"
