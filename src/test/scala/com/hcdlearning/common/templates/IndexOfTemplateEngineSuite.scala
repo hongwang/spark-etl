@@ -37,4 +37,15 @@ class IndexOfTemplateEngineSuite extends SparkFunSuite {
     assert(actual == expected)
   }
 
+  test("default filter") {
+    val engine = new IndexOfTemplateEngine()
+    val content = "Hello {name | default(Empty)}, you were born on {birthday | yyyyMMdd}."
+    val values = Map("name" -> "", "birthday" -> "2000-1-2")
+    val expected = "Hello Empty, you were born on 20000102."
+
+    val actual = engine.render(content, values)
+
+    assert(actual == expected)
+  }
+
 }

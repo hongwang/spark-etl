@@ -71,7 +71,7 @@ object BuzzPromotionBuilding extends App with SparkSupported {
         "sso", 
         "invited_member", 
         s"""
-          |invite_code in ({invite_codes}) and 
+          |invite_code in ({invite_codes | default('')}) and 
           |insert_date between '{target_date}' and date_add('{target_date}', 1)""".stripMargin,
         cache=true,
         registerTo="reg_invited_member"
@@ -84,13 +84,13 @@ object BuzzPromotionBuilding extends App with SparkSupported {
         "load_invitee_member", 
         "sso", 
         "member", 
-        "member_id in ({invitee_member_ids})",
+        "member_id in ({invitee_member_ids | default('')})",
         registerTo="reg_invitee_member"
       ) :: new CassandraInputStep(
         "load_education", 
         "buzz", 
         "education", 
-        "member_id in ({invitee_member_ids})",
+        "member_id in ({invitee_member_ids | default('')})",
         registerTo="reg_eductaion"
       ) :: new SQLTransStep(
         "get_lastest_grade",
