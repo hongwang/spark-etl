@@ -84,13 +84,13 @@ object BuzzPromotionBuilding extends App with SparkSupported {
         "load_invitee_member", 
         "sso", 
         "member", 
-        "member_id in ({invitee_member_ids | default('')})",
+        "member_id in ({invitee_member_ids | default('00000000-0000-0000-0000-000000000000')})",
         registerTo="reg_invitee_member"
       ) :: new CassandraInputStep(
         "load_education", 
         "buzz", 
         "education", 
-        "member_id in ({invitee_member_ids | default('')})",
+        "member_id in ({invitee_member_ids | default('00000000-0000-0000-0000-000000000000')})",
         registerTo="reg_eductaion"
       ) :: new SQLTransStep(
         "get_lastest_grade",
