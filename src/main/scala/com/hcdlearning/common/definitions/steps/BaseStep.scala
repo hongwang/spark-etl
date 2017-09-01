@@ -1,7 +1,7 @@
 package com.hcdlearning.common.definitions.steps
 
 import scala.collection.mutable.{ ArrayBuffer, Map => MutableMap }
-import java.nio.file.Paths
+import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.SaveMode
 
 import com.hcdlearning.common.Logging
@@ -65,7 +65,8 @@ abstract class BaseStep(
       }
 
       if (stage) {
-        val path = Paths.get(ctx.staging_path, ctx.workflow_id, name).toString
+        //val stg_path = new Path(ctx.staging_path)
+        val path = new Path(ctx.staging_path + "/" + ctx.workflow_id + "/" + name).toString
         logInfo(s"staging step to $path")
 
         ctx.df.write.mode(SaveMode.Overwrite).parquet(path)

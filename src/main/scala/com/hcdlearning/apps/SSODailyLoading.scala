@@ -13,7 +13,8 @@ object SSODailyLoading extends App with SparkSupported {
     val params = parseArgs(args)
 
     import udfs.implicits._
-    spark.registerAll()
+    //spark.registerAll()
+    spark.register("timestamp_from_uuid")
 
     val format_member_sql = s"""
       |SELECT archive_date,
@@ -44,9 +45,9 @@ object SSODailyLoading extends App with SparkSupported {
       |  cast(to_unix_timestamp(regist_date) as timestamp) as regist_date,
       |  cast(to_unix_timestamp(insert_date) as timestamp) as insert_date,
       |  cast(to_unix_timestamp(update_date) as timestamp) as update_date,
-      |  {target_date | yyyyMM} as __update_month,
       |  '%s' as __data_center,
-      |  current_timestamp as __insert_time
+      |  current_timestamp as __insert_time,
+      |  {target_date | yyyyMM} as update_month
       |FROM %s
     """.stripMargin
 
@@ -61,7 +62,7 @@ object SSODailyLoading extends App with SparkSupported {
     val save_member_sql = s"""
       |SELECT * 
       |FROM sso.raw_member_activity
-      |WHERE __update_month = {target_date | yyyyMM}
+      |WHERE update_month = {target_date | yyyyMM}
       |  AND archive_date != '{target_date | yyyyMMdd}'
       |UNION ALL
       |SELECT * FROM reg_formatted_member
