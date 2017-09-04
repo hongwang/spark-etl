@@ -1,8 +1,8 @@
-package com.hcdlearning.common.definitions
+package com.hcdlearning.etl.common.definitions
 
 import com.hcdlearning.SparkFunSuite
-import com.hcdlearning.common.ETLException
-import com.hcdlearning.common.definitions.steps._
+import com.hcdlearning.etl.common.ETLException
+import com.hcdlearning.etl.common.definitions.steps._
 
 class RecipeSuite extends SparkFunSuite {
 

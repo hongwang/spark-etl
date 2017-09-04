@@ -14,7 +14,7 @@ SPARK_APP_PATH="target/scala-2.11/spark-etl-assembly-1.0.jar"
 SPARK_APP_URL="hdfs://nameservice-01/user/spark/app/spark-etl-assembly-1.0.jar"
 
 SPARK_ARGS="
-    --class com.hcdlearning.buzz.BuzzETL
+    --class com.hcdlearning.etl.buzz.BuzzETL
     --name ${SPARK_APP_NAME}
     --master ${SPARK_MASTER}
     --deploy-mode cluster

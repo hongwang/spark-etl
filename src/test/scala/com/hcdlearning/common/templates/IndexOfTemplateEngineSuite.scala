@@ -1,4 +1,4 @@
-package com.hcdlearning.common.templates
+package com.hcdlearning.etl.common.templates
 
 import com.hcdlearning.SparkFunSuite
 
