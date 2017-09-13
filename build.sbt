@@ -16,3 +16,12 @@ libraryDependencies ++= Seq(
   "org.scalactic" %% "scalactic" % "3.0.1" % "test",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 )
+
+
+val listSuites = taskKey[Unit]("list all test suites")
+listSuites := {
+  val tests = (definedTests in Test).value
+  tests map { t =>
+    println(t.name)
+  }
+}
