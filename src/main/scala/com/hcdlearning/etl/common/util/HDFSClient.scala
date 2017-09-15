@@ -3,12 +3,7 @@ package com.hcdlearning.etl.common.util
 import java.net.URI
 import java.io.{BufferedReader, InputStreamReader}
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{
-  FileSystem,
-  Path,
-  FSDataInputStream,
-  FSDataOutputStream
-}
+import org.apache.hadoop.fs.{FileSystem, Path, FSDataInputStream, FSDataOutputStream}
 import scala.collection.mutable.ArrayBuffer
 import com.hcdlearning.etl.common.Logging
 
@@ -16,8 +11,7 @@ object HDFSClient extends Logging {
 
   private lazy val fs = {
     val conf = new Configuration()
-    //conf.addResource(new Path("/home/hadoop/conf/core-site.xml"));
-    FileSystem.get(new URI("hdfs://10.20.32.137:8020"), conf)
+    FileSystem.get(conf)
   }
 
   def readFile(path: String): String = {
