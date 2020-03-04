@@ -1,6 +1,7 @@
 target/
-.idea/
+.idea*
 .vscode/
+.metals*
 
 *.log
 build.properties

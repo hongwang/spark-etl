@@ -1,0 +1,5 @@
+com.uuabc.etl.common.definitions.steps.input.HiveInputStep
+com.uuabc.etl.common.definitions.steps.trans.SQLTransStep
+com.uuabc.etl.common.definitions.steps.output.ElasticsearchOutputStep
+com.uuabc.etl.common.definitions.steps.output.PostgresOutputStep
+com.uuabc.etl.common.definitions.steps.output.StdoutOutputStep

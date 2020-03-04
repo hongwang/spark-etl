@@ -1,0 +1,23 @@
+{
+	"app": {
+		"name": "commerce__sales_contract_fact__export"
+	},
+	"input": [
+		{
+			"type": "hive",
+			"name": "load_data",
+			"sql": "SELECT contract_id\n  , contract_tmpl_id\n  , contract_tmpl_name\n  , order_no\n  , student_id\n  , student_sso_id\n  , student_ss_id\n  , student_cn_name\n  , student_phone\n  , cur_cc_id\n  , cur_cc_ss_id\n  , cur_cc_name\n  , cur_cr_id\n  , cur_cr_ss_id\n  , cur_cr_name\n  , contract_status\n  , contract_status_code\n  , DATE(effective_start_date)\n  , DATE(effective_end_date)\n  , TIMESTAMP(paid_time)\n  , DATE(paid_date)\n  , paid_type\n  , paid_times\n  , paid_amt\n  , DATE(accounting_date)\n  , contract_amt\n  , is_renew\n  , is_refund\n  , TIMESTAMP(refund_time)\n  , paid_leave_cnt\n  , free_leave_cnt\n  , paid_1v1_30_cnt\n  , free_1v1_30_cnt\n  , paid_1v1_60_cnt\n  , free_1v1_60_cnt\n  , paid_1v2_30_cnt\n  , free_1v2_30_cnt\n  , paid_1v2_60_cnt\n  , free_1v2_60_cnt\n  , paid_1v4_30_cnt\n  , free_1v4_30_cnt\n  , paid_1v4_60_cnt\n  , free_1v4_60_cnt\n  , paid_cnt\n  , free_cnt\n  , salesman_id\n  , salesman_ss_id\n  , salesman_name\n  , salesman_type\n  , has_income\n  , comment\n  , create_by\n  , TIMESTAMP(create_time)\n  , TIMESTAMP(update_time)\n  , TIMESTAMP(dw_load_time)\n  , sys\nFROM dw.commerce__sales_contract_fact",
+			"registerTo": "tmp_sales_contract"
+		}
+	],
+	"trans": [
+	],
+	"output": [
+		{
+			"type": "postgres",
+			"name": "save_to_pg",
+			"conn_url": ${PG_CONN_URL},
+			"table": "sales.commerce__sales_contract_fact"
+		}
+	]
+}

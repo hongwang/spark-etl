@@ -1,0 +1,26 @@
+{
+	"app": {
+		"name": "simple_demo"
+	},
+	"input": [
+		{
+			"type": "hive",
+			"name": "load_data",
+			"sql": "SELECT * FROM dw.dim_staff",
+			"registerTo": "tmp_staff"
+		}
+	],
+	"trans": [
+		{
+			"type": "sql",
+			"name": "stat_position",
+			"sql": "SELECT position, COUNT(*) FROM tmp_staff GROUP BY position"
+		}
+	],
+	"output": [
+		{
+			"type": "stdout",
+			"name": "print"
+		}
+	]
+}
